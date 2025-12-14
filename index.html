@@ -1,0 +1,185 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description" content="CreatorNexus - منصة إدارة المحتوى الذكية للمحترفين" />
+    
+    <!-- Theme Colors for Mobile Browsers -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)">
+
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <title>CreatorNexus | منصة إدارة المحتوى الاحترافية</title>
+
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (CDN for Dev/Runtime) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Cairo', 'sans-serif'],
+              mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+            },
+            colors: {
+              brand: {
+                50: '#eef2ff',
+                100: '#e0e7ff',
+                500: '#6366f1',
+                600: '#4f46e5',
+                900: '#312e81',
+              }
+            },
+            animation: {
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Global Styles -->
+    <style>
+      /* Base Settings */
+      body {
+        font-family: 'Cairo', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden; /* Prevent horizontal scroll */
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      
+      .dark ::-webkit-scrollbar-thumb { background: #334155; }
+      .dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+      /* Loader Animation Keyframes */
+      @keyframes spin-slow {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .loader-ring {
+        animation: spin-slow 3s linear infinite;
+      }
+    </style>
+
+    <!-- Import Map -->
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "vite": "https://aistudiocdn.com/vite@^7.2.6",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "idb": "https://aistudiocdn.com/idb@^8.0.3",
+    "@google/generative-ai": "https://aistudiocdn.com/@google/generative-ai@^0.24.1",
+    "zod": "https://aistudiocdn.com/zod@^4.1.13",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
+    "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
+    "gapi-script": "https://aistudiocdn.com/gapi-script@^1.2.0",
+    "jszip": "https://aistudiocdn.com/jszip@^3.10.1",
+    "youtube-transcript": "https://esm.sh/youtube-transcript@^1.2.1",
+    "youtubei.js": "https://esm.sh/youtubei.js@^16.0.1"
+  }
+}
+</script>
+    <link rel="stylesheet" href="/index.css">
+  </head>
+  
+  <body class="bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+    
+    <!-- Background Decor (Optional Subtle Gradient) -->
+    <div class="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-[#020617] [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#6366f1_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#020617_40%,#4338ca_100%)] opacity-50 pointer-events-none"></div>
+
+    <div id="root">
+      <!-- 
+        INITIAL LOADING STATE 
+        This content is visible only until React loads.
+        It provides a professional "App-like" feel instead of a white screen.
+      -->
+      <div style="
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        bottom: 0; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center; 
+        background-color: transparent;
+        z-index: 9999;
+      ">
+        <div style="position: relative; width: 80px; height: 80px;">
+          <!-- Outer Ring -->
+          <div class="loader-ring" style="
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: #6366f1; /* Indigo-500 */
+            border-right-color: #6366f1;
+            opacity: 0.8;
+          "></div>
+          
+          <!-- Inner Circle -->
+          <div style="
+            position: absolute;
+            inset: 15px;
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            <!-- Simple SVG Logo Placeholder -->
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v20M2 12h20"/>
+            </svg>
+          </div>
+        </div>
+        
+        <h1 style="
+          margin-top: 24px; 
+          font-family: 'Cairo', sans-serif; 
+          font-weight: 700; 
+          color: #4f46e5; 
+          font-size: 18px;
+          letter-spacing: 0.5px;
+        ">
+          CreatorNexus
+        </h1>
+        <p style="
+          margin-top: 8px; 
+          font-family: 'Cairo', sans-serif; 
+          font-size: 12px; 
+          color: #94a3b8;
+        ">
+          جاري تجهيز بيئة العمل...
+        </p>
+      </div>
+    </div>
+
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

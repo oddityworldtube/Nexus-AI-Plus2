@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { RefreshCw, Send, Sparkles, Plus, CheckCircle, X, Zap, Brain, HeartPulse, AlertCircle, Languages, Activity } from 'lucide-react';
+import { RefreshCw, Send, Sparkles, Plus, CheckCircle, X, Zap, Brain, HeartPulse, AlertCircle, Languages, Activity, TrendingUp } from 'lucide-react';
 import { OptimizationResult, ScoredHook } from '../../types';
 
 interface MetadataEditorProps {
@@ -13,7 +12,7 @@ interface MetadataEditorProps {
     loadingStates: { title: boolean, desc: boolean, tags: boolean, hooks: boolean };
     hooks: ScoredHook[];
     hookLanguage: string;
-    tagsLanguage?: string; // New prop
+    tagsLanguage?: string;
     savingPart: 'title' | 'desc' | 'tags' | 'thumbnail' | 'all' | null;
     quotaExceeded: boolean;
     onUpdate: (field: 'title' | 'description' | 'tagInput' | 'hookLanguage' | 'tagsLanguage', value: string) => void;
@@ -23,6 +22,29 @@ interface MetadataEditorProps {
     onAddRelated: () => void;
     onScoreCurrent?: () => void;
 }
+
+// دالة مساعدة لتحديد ستايل الكلمة بناءً على قوتها
+const getTagStyles = (score: number) => {
+    if (score >= 90) return {
+        container: 'bg-emerald-50 text-emerald-900 border-emerald-300 ring-1 ring-emerald-500 shadow-[0_2px_8px_rgba(16,185,129,0.15)]',
+        badge: 'bg-emerald-600 text-white shadow-sm'
+    }; // Elite / ممتاز
+    
+    if (score >= 80) return {
+        container: 'bg-green-50 text-green-700 border-green-200 shadow-sm',
+        badge: 'bg-green-200 text-green-800'
+    }; // Good / جيد جداً
+    
+    if (score >= 70) return {
+        container: 'bg-amber-50 text-amber-800 border-amber-200',
+        badge: 'bg-amber-200 text-amber-800'
+    }; // Average / متوسط
+    
+    return {
+        container: 'bg-red-50 text-red-700 border-red-100 opacity-90',
+        badge: 'bg-red-200 text-red-800'
+    }; // Weak / ضعيف
+};
 
 const MetadataEditor: React.FC<MetadataEditorProps> = (props) => {
     const { 
@@ -73,7 +95,7 @@ const MetadataEditor: React.FC<MetadataEditorProps> = (props) => {
                                         </span>
                                     </div>
 
-                                    {/* Psychology Analysis Badges (New Feature) */}
+                                    {/* Psychology Analysis Badges */}
                                     {item.psychology && (
                                         <div className="mt-3 pt-2 border-t border-indigo-100 grid grid-cols-2 md:grid-cols-3 gap-2 relative z-10">
                                             <div className="flex items-center gap-1.5 text-[10px] bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium">
@@ -161,24 +183,28 @@ const MetadataEditor: React.FC<MetadataEditorProps> = (props) => {
                     </div>
                 </div>
                 
+                {/* --- Current Tags with Advanced Coloring --- */}
                 <div className="flex flex-wrap gap-2 mb-4 bg-gray-50 p-4 rounded-xl min-h-[60px] border border-gray-100">
                     {tags.map((t, i) => {
-                        // Check score with lowercase logic to be safe
                         const score = tagScores[t.trim().toLowerCase()] || 0;
-
-                        let scoreColor = 'bg-gray-200 text-gray-600';
-                        if (score >= 80) scoreColor = 'bg-green-100 text-green-700 border-green-200';
-                        else if (score >= 50) scoreColor = 'bg-amber-100 text-amber-700 border-amber-200';
-                        else if (score > 0) scoreColor = 'bg-red-100 text-red-700 border-red-200';
+                        const styles = score > 0 ? getTagStyles(score) : { 
+                            container: 'bg-white text-gray-600 border-gray-200 hover:border-gray-300', 
+                            badge: 'bg-gray-100 text-gray-500' 
+                        };
 
                         return (
-                            <div key={i} className="group flex items-center gap-1 bg-white border border-gray-200 pl-1 pr-3 py-1.5 rounded-lg text-sm shadow-sm hover:border-indigo-300 transition">
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${scoreColor} min-w-[24px] text-center`}>{score > 0 ? score : '?'}</span>
-                                <span>{t}</span>
-                                <button onClick={() => onUpdateTags(tags.filter(tag => tag !== t))} className="text-gray-300 hover:text-red-500 p-0.5"><X size={14} /></button>
+                            <div key={i} className={`group flex items-center gap-2 border pl-1.5 pr-3 py-1.5 rounded-lg text-sm transition-all duration-300 hover:scale-105 ${styles.container}`}>
+                                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded min-w-[24px] text-center ${styles.badge}`}>
+                                    {score > 0 ? score : '?'}
+                                </span>
+                                <span className="font-bold tracking-tight">{t}</span>
+                                <button onClick={() => onUpdateTags(tags.filter(tag => tag !== t))} className="opacity-40 hover:opacity-100 hover:text-red-600 p-0.5 transition ml-1">
+                                    <X size={14} />
+                                </button>
                             </div>
                         )
                     })}
+                    {tags.length === 0 && <p className="text-gray-400 text-sm italic w-full text-center py-2">لا توجد كلمات دلالية مضافة.</p>}
                 </div>
                 
                 <div className="relative">
@@ -192,14 +218,14 @@ const MetadataEditor: React.FC<MetadataEditorProps> = (props) => {
                     <Plus className="absolute right-3 top-3.5 text-gray-400" size={20} />
                 </div>
 
-                {/* Suggestions Language Control - Moved ABOVE Suggestions Box */}
+                {/* Suggestions Language Control */}
                 <div className="mt-6 mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <p className="text-xs font-bold text-green-700 flex items-center gap-1">
-                        <CheckCircle size={12}/> كلمات مقترحة جديدة:
+                        <TrendingUp size={14}/> كلمات مقترحة جديدة (مبنية على التحليل):
                     </p>
                     <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-lg border border-gray-200">
                         <Languages size={14} className="text-gray-400"/>
-                        <span className="text-[10px] font-bold text-gray-500">لغة الاقتراحات:</span>
+                        <span className="text-[10px] font-bold text-gray-500">اللغة:</span>
                         <select 
                             value={tagsLanguage} 
                             onChange={(e) => onUpdate('tagsLanguage', e.target.value)} 
@@ -222,13 +248,29 @@ const MetadataEditor: React.FC<MetadataEditorProps> = (props) => {
                     </div>
                 </div>
 
+                {/* --- Suggested Tags with Advanced Coloring --- */}
                 {result?.suggestedTags && result.suggestedTags.length > 0 && (
-                    <div className="pt-2 border-t border-dashed border-gray-200 flex flex-wrap gap-2">
-                        {result.suggestedTags.filter(st => !tags.includes(st.tag)).slice(0, 15).map((st, i) => (
-                            <button key={i} onClick={() => onUpdateTags([...tags, st.tag])} className="text-xs bg-green-50 text-green-800 border border-green-200 px-2 py-1.5 rounded-lg hover:bg-green-100 transition flex items-center gap-1">
-                                <Plus size={12}/> {st.tag} <span className="opacity-60 text-[10px] font-bold">({st.score})</span>
-                            </button>
-                        ))}
+                    <div className="pt-4 border-t border-dashed border-gray-200 flex flex-wrap gap-2">
+                        {result.suggestedTags
+                            .filter(st => !tags.includes(st.tag))
+                            .slice(0, 20)
+                            .map((st, i) => {
+                                const styles = getTagStyles(st.score);
+                                return (
+                                    <button 
+                                        key={i} 
+                                        onClick={() => onUpdateTags([...tags, st.tag])} 
+                                        className={`group flex items-center gap-2 border px-3 py-1.5 rounded-lg text-sm transition-all duration-200 hover:scale-105 hover:shadow-md ${styles.container}`}
+                                        title={`إضافة: ${st.tag}`}
+                                    >
+                                        <Plus size={12} className="opacity-50 group-hover:opacity-100"/> 
+                                        <span className="font-bold">{st.tag}</span> 
+                                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${styles.badge}`}>
+                                            {st.score}
+                                        </span>
+                                    </button>
+                                );
+                        })}
                     </div>
                 )}
             </div>

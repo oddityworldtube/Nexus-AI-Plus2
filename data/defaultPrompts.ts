@@ -834,7 +834,7 @@ Repurpose this video transcript into social media posts.
         Return ONLY the string of keywords for the selected style. Do not include the style number or any explanation.
         Example Output: "cinematic, dramatic lighting, epic, photo, realistic"
         ` 
-    }
+    },
     {
         id: "generate_batch_scene_prompts",
         name: "توليد برومبتات دفعة (Batch Prompts)",

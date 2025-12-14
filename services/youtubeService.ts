@@ -225,7 +225,7 @@ export const fetchVideoRealAnalytics = async (videoId: string, publishedAt: stri
 
 export const fetchVideoCaptions = async (videoId: string, token?: string): Promise<VideoCaption[] | null> => {
     // ---------------------------------------------------------
-    // 1. الطريقة الوحيدة: السيرفر المحلي (Local Proxy / Scraper)
+    // 1. المحاولة الأولى: السيرفر المحلي (Local Proxy / Scraper)
     // هذه الطريقة لا تتطلب تسجيل دخول وتعمل مع معظم الفيديوهات
     // ---------------------------------------------------------
     try {
@@ -247,12 +247,63 @@ export const fetchVideoCaptions = async (videoId: string, token?: string): Promi
             }
         }
     } catch (e) {
-        console.warn("[Transcript] ⚠️ Local proxy failed or blocked.", e);
+        console.warn("[Transcript] ⚠️ Local proxy failed or blocked. Trying fallback...", e);
     }
 
-    // تم حذف المحاولة الثانية (Official API) لتقليل الاعتماد على صلاحيات الحساب وتوفير الكوتا
+    // ---------------------------------------------------------
+    // 2. المحاولة الثانية: API الرسمي (Official YouTube API)
+    // تتطلب هذه الطريقة (OAuth Token) وتعمل فقط إذا كان المستخدم مسجلاً
+    // ---------------------------------------------------------
+    if (token) {
+        console.log("[Transcript] 🔄 Switching to Official YouTube API (OAuth)...");
+        try {
+            // أ. جلب قائمة ملفات الترجمة
+            const listResponse = await fetch(`${BASE_URL}/captions?part=snippet&videoId=${videoId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
 
-    console.error("[Transcript] Local proxy failed. No transcript available.");
+            if (!listResponse.ok) {
+                console.warn(`[Transcript] Official API List Failed: ${listResponse.status}`);
+                return null;
+            }
+
+            const listData = await listResponse.json();
+            if (!listData.items || listData.items.length === 0) {
+                console.warn("[Transcript] No caption tracks found via Official API.");
+                return null;
+            }
+
+            // ب. اختيار أفضل مسار (عربي > إنجليزي > الأول)
+            const items = listData.items;
+            let selectedTrack = items.find((t: any) => t.snippet.language === 'ar' && t.snippet.trackKind === 'standard');
+            if (!selectedTrack) selectedTrack = items.find((t: any) => t.snippet.language === 'ar');
+            if (!selectedTrack) selectedTrack = items.find((t: any) => t.snippet.language === 'en');
+            if (!selectedTrack) selectedTrack = items[0];
+
+            console.log(`[Transcript] Downloading track: ${selectedTrack.snippet.language} (${selectedTrack.snippet.trackKind})`);
+
+            // ج. تحميل ملف الترجمة (tfmt=vtt)
+            const downloadResponse = await fetch(`${BASE_URL}/captions/${selectedTrack.id}?tfmt=vtt`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!downloadResponse.ok) {
+                console.error("[Transcript] Download failed via Official API.");
+                return null;
+            }
+
+            const vttText = await downloadResponse.text();
+            
+            // د. تحليل ملف VTT
+            return parseVTT(vttText);
+
+        } catch (e) {
+            console.error("[Transcript] Official API Exception:", e);
+            return null;
+        }
+    }
+
+    console.error("[Transcript] All methods failed. No transcript available.");
     return null;
 };
 // --- Lightweight Fetcher for Analysis ---
